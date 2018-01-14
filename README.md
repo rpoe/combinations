@@ -1,2 +1,2 @@
-# combinations
-Functions implementing combinatorial algorithms and boolean algebra functions
+# permutations
+A go function calculating the set of permutations of a set
