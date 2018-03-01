@@ -77,7 +77,7 @@ func TestFacultyRange(t *testing.T) {
 	}
 }
 
-func TestPermutations(t *testing.T) {
+func TestGeneratePermutations(t *testing.T) {
 	cases := []struct {
 		in   []interface{}
 		want [][]interface{}
@@ -99,29 +99,118 @@ func TestPermutations(t *testing.T) {
 				{4, 2, 3, 1}, {2, 4, 3, 1}, {2, 3, 4, 1}}},
 	}
 	for _, c := range cases {
-		got := Permutations(c.in)
+		got := GeneratePermutations(c.in)
 		if !reflect.DeepEqual(got, c.want) {
-			t.Errorf("Permutations(%v) == %v, want %v", c.in, got, c.want)
+			t.Errorf("GeneratePermutations(%v) == %v, want %v", c.in, got, c.want)
 		}
 	}
 }
 
-func TestLenPermutations(t *testing.T) {
+// verify first and last element
+func TestGeneratePermutationsLast(t *testing.T) {
 	cases := []struct {
-		in []interface{}
+		in   []interface{}
+		want [][]interface{}
 	}{
-		{[]interface{}{1}},
-		{[]interface{}{1, 2}},
-		{[]interface{}{1, 2, 3, 4, 5, 6, 7, 8, 9}},
-		{[]interface{}{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}},
-		//{[]interface{}{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, 39916800}, // runs out of memory, not testable
+		{[]interface{}{1}, [][]interface{}{{1}, {1}}},
+		{[]interface{}{1, 2}, [][]interface{}{{1, 2}, {2, 1}}},
+		{[]interface{}{1, 2, 3}, [][]interface{}{
+			{1, 2, 3}, {2, 3, 1}}},
+		{[]interface{}{1, 2, 3, 4}, [][]interface{}{
+			{1, 2, 3, 4}, {2, 3, 4, 1}}},
+		{[]interface{}{1, 2, 3, 4, 5}, [][]interface{}{
+			{1, 2, 3, 4, 5}, {2, 3, 4, 5, 1}}},
+		{[]interface{}{1, 2, 3, 4, 5, 6}, [][]interface{}{
+			{1, 2, 3, 4, 5, 6}, {2, 3, 4, 5, 6, 1}}},
+		{[]interface{}{1, 2, 3, 4, 5, 6, 7}, [][]interface{}{
+			{1, 2, 3, 4, 5, 6, 7}, {2, 3, 4, 5, 6, 7, 1}}},
+		{[]interface{}{1, 2, 3, 4, 5, 6, 7, 8},
+			[][]interface{}{
+				{1, 2, 3, 4, 5, 6, 7, 8},
+				{2, 3, 4, 5, 6, 7, 8, 1}}},
+		{[]interface{}{1, 2, 3, 4, 5, 6, 7, 8, 9},
+			[][]interface{}{
+				{1, 2, 3, 4, 5, 6, 7, 8, 9},
+				{2, 3, 4, 5, 6, 7, 8, 9, 1}}},
 	}
 	for _, c := range cases {
-		res := Permutations(c.in)
-		got := int64(len(res))
-		want := Faculty(len(c.in)) //len(permutations(in)) is faculty(len(in))
-		if got != want {
-			t.Errorf("len(Permutations(%v)) == %v, want %v", c.in, got, want)
+		got := GeneratePermutations(c.in)
+		n := len(got) - 1
+		if !reflect.DeepEqual(got[0], c.want[0]) {
+			t.Errorf("GeneratePermutations(%v) == [0]%v, want[0] %v", c.in, got[0], c.want[0])
+		}
+		if !reflect.DeepEqual(got[n], c.want[1]) {
+			t.Errorf("GeneratePermutations(%v) == [n]%v, want[1] %v", c.in, got[n], c.want[1])
+		}
+	}
+}
+
+func TestGeneratePermutationsSortedAll(t *testing.T) {
+	cases := []struct {
+		in   []interface{}
+		want [][]interface{}
+	}{
+		{[]interface{}{1}, [][]interface{}{{1}}},
+		{[]interface{}{1, 2}, [][]interface{}{{1, 2}, {2, 1}}},
+		{[]interface{}{'a', 'b'}, [][]interface{}{{'a', 'b'}, {'b', 'a'}}},
+		{[]interface{}{"alpha", "beta"}, [][]interface{}{{"alpha", "beta"}, {"beta", "alpha"}}},
+		{[]interface{}{1, 2, 3}, [][]interface{}{
+			{1, 2, 3}, {1, 3, 2},
+			{2, 1, 3}, {2, 3, 1},
+			{3, 1, 2}, {3, 2, 1}}},
+		{[]interface{}{1, 2, 3, 4}, [][]interface{}{
+			{1, 2, 3, 4}, {1, 2, 4, 3}, {1, 3, 2, 4},
+			{1, 3, 4, 2}, {1, 4, 2, 3}, {1, 4, 3, 2},
+			{2, 1, 3, 4}, {2, 1, 4, 3}, {2, 3, 1, 4},
+			{2, 3, 4, 1}, {2, 4, 1, 3}, {2, 4, 3, 1},
+			{3, 1, 2, 4}, {3, 1, 4, 2}, {3, 2, 1, 4},
+			{3, 2, 4, 1}, {3, 4, 1, 2}, {3, 4, 2, 1},
+			{4, 1, 2, 3}, {4, 1, 3, 2}, {4, 2, 1, 3},
+			{4, 2, 3, 1}, {4, 3, 1, 2}, {4, 3, 2, 1}}},
+	}
+	for _, c := range cases {
+		got := GeneratePermutationsSorted(c.in)
+		if !reflect.DeepEqual(got, c.want) {
+			t.Errorf("GeneratePermutationsSorted(%v) == %v, want %v", c.in, got, c.want)
+		}
+	}
+}
+
+// verify first and last element
+func TestGeneratePermutationsSortedLast(t *testing.T) {
+	cases := []struct {
+		in   []interface{}
+		want [][]interface{}
+	}{
+		{[]interface{}{1}, [][]interface{}{{1}, {1}}},
+		{[]interface{}{1, 2}, [][]interface{}{{1, 2}, {2, 1}}},
+		{[]interface{}{1, 2, 3}, [][]interface{}{
+			{1, 2, 3}, {3, 2, 1}}},
+		{[]interface{}{1, 2, 3, 4}, [][]interface{}{
+			{1, 2, 3, 4}, {4, 3, 2, 1}}},
+		{[]interface{}{1, 2, 3, 4, 5}, [][]interface{}{
+			{1, 2, 3, 4, 5}, {5, 4, 3, 2, 1}}},
+		{[]interface{}{1, 2, 3, 4, 5, 6}, [][]interface{}{
+			{1, 2, 3, 4, 5, 6}, {6, 5, 4, 3, 2, 1}}},
+		{[]interface{}{1, 2, 3, 4, 5, 6, 7}, [][]interface{}{
+			{1, 2, 3, 4, 5, 6, 7}, {7, 6, 5, 4, 3, 2, 1}}},
+		{[]interface{}{1, 2, 3, 4, 5, 6, 7, 8},
+			[][]interface{}{
+				{1, 2, 3, 4, 5, 6, 7, 8},
+				{8, 7, 6, 5, 4, 3, 2, 1}}},
+		{[]interface{}{1, 2, 3, 4, 5, 6, 7, 8, 9},
+			[][]interface{}{
+				{1, 2, 3, 4, 5, 6, 7, 8, 9},
+				{9, 8, 7, 6, 5, 4, 3, 2, 1}}},
+	}
+	for _, c := range cases {
+		got := GeneratePermutationsSorted(c.in)
+		n := len(got) - 1
+		if !reflect.DeepEqual(got[0], c.want[0]) {
+			t.Errorf("GeneratePermutationsSorted(%v) == [0]%v, want[0] %v", c.in, got[0], c.want[0])
+		}
+		if !reflect.DeepEqual(got[n], c.want[1]) {
+			t.Errorf("GeneratePermutationsSorted(%v) == [n]%v, want[1] %v", c.in, got[n], c.want[1])
 		}
 	}
 }
